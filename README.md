@@ -1,0 +1,1 @@
+For this assignment I had to prepare data that was provided from the CUNYMart inventory, which is located at located at 123 Example Street,Anytown, USA. To prepare the data for analysis, I had to turn the given data into JSon, HTML, XML, and Parquet files and then read them in R
