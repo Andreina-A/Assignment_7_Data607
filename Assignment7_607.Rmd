@@ -1,0 +1,186 @@
+---
+title: "Assignment 7"
+author: "Andreina A"
+date: "2024-10-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment 7:working with JSON, HTML, XML, and Parquet in R
+
+## Introduction
+
+*For this assignment I had to prepare data that was provided from the CUNYMart inventory, which is located at located at 123 Example Street,Anytown, USA. To prepare the data for analysis, I had to turn the given data into JSon, HTML, XML, and Parquet files and then read them in R.*
+
+**Loading packages**
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library("arrow")
+library(XML)
+library(RCurl)
+library(pdftools)
+library(data.table)
+library(jsonlite)
+```
+
+
+## Preparing data:
+
+**I created the data frame in R from the data frame we were provided for the assignment on CUNYMart's inventory.**
+
+```{r}
+DF_prep<- data.frame(
+  Category = c("Electronics", "Electronics", "Electronics", "Electronics",
+               "Home Appliances", "Home Appliances", "Home Appliances", "Home Appliances",
+               "Clothing", "Clothing", "Clothing", "Clothing", "Clothing", 
+               "Books", "Books", "Books", "Books", 
+               "Sports Equipment", "Sports Equipment", "Sports Equipment"),
+  Item_Name = c("Smartphone", "Smartphone", "Laptop", "Laptop",
+                "Refrigerator", "Refrigerator", "Washing Machine", "Washing Machine",
+                "T-Shirt", "T-Shirt", "T-Shirt", "Jeans", "Jeans",
+                "Fiction Novel", "Fiction Novel", "Non-Fiction Guide", "Non-Fiction Guide",
+                "Basketball", "Tennis Racket", "Tennis Racket"),
+  Item_ID = c(101, 101, 102, 102,
+              201, 201, 202, 202,
+              301, 301, 301, 302, 302,
+              401, 401, 402, 402,
+              501, 502, 502),
+  Brand = c("TechBrand", "TechBrand", "CompuBrand", "CompuBrand",
+            "HomeCool", "HomeCool", "CleanTech", "CleanTech",
+            "FashionCo", "FashionCo", "FashionCo", "DenimWorks", "DenimWorks",
+            NA, NA, NA, NA,
+            "SportsGear", "RacketPro", "RacketPro"),
+  Price = c(699.99, 699.99, 1099.99, 1099.99,
+            899.99, 899.99, 499.99, 499.99,
+            19.99, 19.99, 19.99, 49.99, 49.99,
+            14.99, 14.99, 24.99, 24.99,
+            29.99, 89.99, 89.99),
+  Variation_ID = c("101-A", "101-B", "102-A", "102-B",
+                   "201-A", "201-B", "202-A", "202-B",
+                   "301-A", "301-B", "301-C", "302-A", "302-B",
+                   "401-A", "401-B", "402-A", "402-B",
+                   "501-A", "502-A", "502-B"),
+  Variation_Details = c("Color: Black, Storage: 64GB", "Color: White, Storage: 128GB",
+                        "Color: Silver, Storage: 256GB", "Color: Space Gray, Storage: 512GB",
+                        "Color: Stainless Steel, Capacity: 20 cu ft", "Color: White, Capacity: 18 cu ft",
+                        "Type: Front Load, Capacity: 4.5 cu ft", "Type: Top Load, Capacity: 5.0 cu ft",
+                        "Color: Blue, Size: S", "Color: Red, Size: M", "Color: Green, Size: L",
+                        "Color: Dark Blue, Size: 32", "Color: Light Blue, Size: 34",
+                        "Format: Hardcover, Language: English", "Format: Paperback, Language: Spanish",
+                        "Format: eBook, Language: English", "Format: Paperback, Language: French",
+                        "Size: Size 7, Color: Orange", "Material: Graphite, Color: Black", "Material: Aluminum, Color: Silver")
+)
+```
+
+
+# HTML
+
+**The data frame was created into a HTML file using the textEditor application. To create the HTML manually I started with <HTML>, then in the next line I used "table" (to create a table within the HTML), to create a row I used "tr", for the first row which was my header I used <th> for each cell follow up the name of each column (ex."th" Category "th"), for the following rows I used "td" as the tag for the data that belongs in the specific row and column, then to close the table I placed another "table" tag,and finally ended the file with "html". I uploaded the html file into github, to obtain the raw data. I used getURL function to load the raw html file into R.**
+
+```{r}
+html_DF<-getURL('https://raw.githubusercontent.com/Andreina-A/Assignment_7_Data607/refs/heads/main/dataframe.html')
+```
+
+
+```{r}
+cat(html_DF) # The view of the HTML code
+```
+
+**To extract the data from the HTML file, I used readHTMLTable( a function from the XML package).** 
+
+```{r}
+html_df <-readHTMLTable(html_DF,header=TRUE)
+class(html_df)# Used calls function to see is the data extracted came out as a data frame, which it came out as a list instead.
+```
+**To find the data frame, checked the class of the NULL object.**
+
+```{r}
+class(html_df$`NULL`)# I used NULL because it was the only generated option after I enter $
+```
+
+
+**I created the data frame variable with by extracted the NULL object from the HTML. Now the data is ready to use in vairbale HTML_dataframe**
+
+```{r}
+html_dataframe<-html_df$`NULL`
+html_dataframe
+```
+
+# XML
+
+**XML was manually created similarly to HTML, just with a difference in tags which are more straightforward, the column title themselves were used in the tags.**
+
+```{r}
+DF_XML<-getURL('https://raw.githubusercontent.com/Andreina-A/Assignment_7_Data607/refs/heads/main/Data_xml.xml')
+```
+
+
+```{r}
+cat(DF_XML)#XML code
+```
+
+Used the class function to see if the XML file will readily show as a data frame
+```{r}
+class(DF_XML)# output was a character
+```
+
+
+**To obtain the data frame from the XML file I used the xmlToDataFrame function, now the data is ready to be used for analysis.**
+
+```{r}
+XML_df <-xmlToDataFrame(DF_XML)
+XML_df
+```
+
+
+# JSON
+**In order to get json code I used the data frame I created in R, using the toJSON function. Once the code was generated I created a json file using the texteditor application, and lastly I uploaded the file into github. The json codes reminds me of a python dictionary, which seems easy to code manually and easy to read.**
+```{r}
+Df_Json <- toJSON(DF_prep, pretty=TRUE)
+cat(Df_Json)
+```
+
+
+**Now that the file is created, I imported file from the github url using the fromjson function in R, which will parse the file back into a data frame.**
+```{r}
+Json_df<-fromJSON("https://raw.githubusercontent.com/Andreina-A/Assignment_7_Data607/refs/heads/main/json_df.json")
+class(Json_df)
+```
+
+
+**Using the data.table function I will create a variable called json _df to have the table of the json file. Now the json data dataframe is ready to be used for analysis.**
+
+```{r}
+Json_df<-data.table(Json_df)
+Json_df
+```
+
+
+# Parquet
+
+**To create a parquet file I used the data frame I created in the beginning of this R markdown, to write a parquet file to save into my computer. I didn't used the github to import this file becasuwe github wasn't able to read the file, instead it just downloaded to file back to my computer.**
+
+```{r create_parquet}
+write_parquet(DF_prep, "CUNYMart_Inventory.parquet")
+```
+
+#read parquet file
+
+**To read the parquet file I used the read_parquet function (which is from the "arrow" package)**
+
+```{r}
+Parquet_df<-read_parquet("CUNYMart_Inventory.parquet")
+class(Parquet_df) #class function showed that Parquet_df is a data frame table
+```
+
+
+```{r Parquet_view}
+head(Parquet_df)
+```
+
+# Conlusion
+
+HTML, XML, and Json are file formats that can be created with coding in which are human readable, while Parquet requires a machine such as a R library in order to read and write than the Parquet file. I wasn't able to load the Parquet file into github to see the coding if there is any. In my opinion Json would be the easiest file to write because you have to use the tags nor a library like parquet to create a file. I would as parquet would have less chance of mistakes as you will be creating the data frame first in a library which you can readily fix any errors without brackets or tags being in the way, and then you just create the parquet file. When comparing files sizes from descending order XML had the highest size of 7.13KB, HTML was 4.49KB, parquet was 4.37KB, and Json had a size of 4.3KB. I would say XML is has tags that are easier to understand than HTML, but XML taks up alot of space. Overall, I would prefer workign with Json files as they are space efficent and easier to write and read.
