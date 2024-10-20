@@ -1,4 +1,4 @@
-{
+[
     {
         "Category": "Electronics",
         "Item Name": "Smartphone",
@@ -238,4 +238,5 @@
             "Material": "Aluminum",
             "Color": "Silver"
         }
- }
+    }
+]
